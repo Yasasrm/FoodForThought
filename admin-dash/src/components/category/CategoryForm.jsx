@@ -4,9 +4,31 @@ import { CategoryContext } from "../context/CategoryContext";
 function CategoryForm() {
   const { categoryList, setCategoryList } = useContext(CategoryContext);
   const [categoryName, setCategoryName] = useState("");
-  const handleAddCategory = () => {
-    const newCategory = { id: categoryList.length + 1, name: categoryName };
-    setCategoryList([...categoryList, newCategory]);
+  const handleAddCategory = async () => {
+    if (!categoryName.trim()) return;
+
+    const newCategory = { name: categoryName };
+
+    try {
+      const response = await fetch("http://localhost:5000/categories", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newCategory),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      setCategoryList([...categoryList, data]);
+      setCategoryName("");
+    } catch (error) {
+      console.error("Error adding category:", error);
+    }
   };
   return (
     <>
